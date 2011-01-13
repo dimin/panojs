@@ -1,0 +1,20 @@
+TODO:
+  + support for more events: scroll wheel for zoom
+  + support for touch events (zoom, scroll)
+  + support multiple instances
+  + fix viewer init scale detection and positioning
+  + fix zoom in oversize bug
+  + show zoom scale in % in tiler
+  + good full window support
+  + pre-cache tiles in the first row outside of visible area
+  + create one line instantiator
+  + google maps like controls - zoomin on double click
+  + center on one click
+  + bug in zooming with panning
+  + some problems showing tiles
+  + small info text about the state: scale, etc...
+  + IE support
+  + error in thumbnail ROI positioning with some images?
+  + Use ExtJS for events
+  + error in full screen with multiple viewers
+  + iPhone, iPad and Android controls UI
