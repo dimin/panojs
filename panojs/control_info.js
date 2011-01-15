@@ -43,5 +43,6 @@ InfoControl.prototype.createDOMElements = function() {
 InfoControl.prototype.viewerZoomed = function(e) {
     var sz = this.viewer.imageSize();
     if (this.dom_info) 
-        this.dom_info.innerHTML = 'Image size: '+ sz.width +'x'+ sz.height +' Scale: '+ e.scale*100 +'%';   
+        this.dom_info.innerHTML = 'Image size: '+ sz.width +'x'+ sz.height +' Scale: '+ e.scale*100 +'%' + 
+        ' - <a href="http://www.dimin.net/software/panojs">PanoJS3</a>';   
 }

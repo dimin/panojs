@@ -1,0 +1,128 @@
+<html>
+	<head>
+		<title>PanoJS - Quick Reference</title>
+		<style type="text/css">
+body
+{
+	font-family: "Times New Roman";
+	margin: 0;
+	padding: 10px;
+	font-size: .85em;
+	line-height: 1.3em;
+}
+dl
+{
+	margin-left: 10px;
+}
+dt
+{
+	font-weight: bold;
+}
+		</style>
+	</head>
+	<body>
+	  <h1>To be updated for PanoJS3</h1>
+	  
+		<h1>PanoJS Quick Reference</h1>
+		<h3>Overview</h3>
+		<p>This library provides a browser client with an interface to pan and zoom an image that is much larger than the screen, fetching tiled sections on demand. As one edge of the image moves off the screen in one direction, new portions of the image appear on the opposing side. Using this type of interface allows the image being viewed to theoretically be infinite. As such, the taxation on the network connection is minimized tremendously by the fact that only portions of the image are needed at any given time.</p>
+		<h3>Usage</h3>
+		<p>In order to use this library, it is necessary to first generate the tiles for your image.  For that, the tilemaker.py python script can be used.  <strong>This script requires the <a href="http://www.pythonware.com/products/pil/">Python Imaging Library</a> (PIL) module.</strong> The script performs two primary functions.  It creates tiles of the given size for the 1:1 resolution and also for each power-of-two scaling until the whole image fits within the given size of a single tile.  This progressive scaling provides the zoom out capability in the interface.  (Please note that padding will likely be applied to the image to make it square and mathematically perfect)</p>
+		<p>The following snippet will take the file <kbd>canvas.png</kbd> and generate 256 pixel tiles at png quality 9.  The filename pattern allows for customization of the output, but is often left as is. The tiles are put in the current working directory.</p>
+		<pre>python tilemaker.py -s256 -Q9 -t"tile-%d-%d-%d.png" -bFFFFFF -v canvas.png</pre>
+		<p>Once the tiles are generated, it is time to setup the webpage for displaying them.  There are several crucial components required to make the viewer work.  The example index file provided with the library demonstrates these inclusions.</p>
+		<ul>
+		</ul>
+			<li>include the PanoJS.js javascript library<br /><pre>&lt;script type="text/javascript" src="PanoJS.js" /&gt;</pre></li>
+			<li>include the panojs.css stylesheet<br /><pre>&lt;link rel="stylesheet" href="panojs.css" /&gt;</li>
+			<li>create a target html container for the viewer<br /><pre>&lt;div id="viewer"&gt;
+  &lt;div class="well"&gt;&lt;!-- --&gt;&lt;/div&gt;
+  &lt;div class="surface"&gt;&lt;!-- --&gt;&lt;/div&gt;
+  &lt;p class="controls"&gt;
+    &lt;span class="zoomIn" title="Zoom In"&gt;+&lt;/span&gt;
+    &lt;span class="zoomOut" title="Zoom Out"&gt;-&lt;/span&gt;
+  &lt;/p&gt;
+&lt;/div&gt;</pre></li>
+		</ul>
+		<p>All that is left is to initialize the viewer on page load with the settings specific to your environment.  This step involves some trickery to get the viewer to initialize itself at the correct time in all browsers, but aside from that logic (which can be found in the example index file), the snippet below we get you up and running.</p>
+		<pre>
+var viewerBean;
+window.onload = function() {
+	viewerBean = new PanoJS('viewer', {
+		tileBaseUri: 'tiles',
+		tileSize: 256,
+		tilePrefix: 'tile-',
+		tileExtension: 'png',
+		maxZoom: 5,
+		initialZoom: 3,
+		blankTile: 'blank.gif',
+		loadingTile: 'blank.gif'
+	});
+	viewerBean.init();
+}
+		</pre>
+		<p>The only area where you might get tripped up is the maxZoom setting.  The maxZoom is dependent entirely on the dimensions of your original image.  To determine the maxZoom, look at the tiles and find the highest value of the first digit (tile-5-0-0.jpg).  That number is the maxZoom value.</p>
+		<h3>Options</h3>
+		<p>The following is a list of available settings that can be provided in the constructor.</p>
+		<dl>
+			<dt>tileUrlProvider [object]</dt>
+			<dd>An object which extends PanoJS.TileUrlProvider that provides a method assembleUrl, which will be called each time a new tile is fetched.  Internally, a default implementation is provided if one is not given.</dd>
+
+			<dt>tileBaseUri [string]</dt>
+			<dd>A relative or absolute URL that prefixes the tile name when fetching a tile.  <em>This option is only used if tileUrlProvider is not used.</em></dd>
+
+			<dt>tilePrefix [string]</dt>
+			<dd>The file name prefix of the tile. <em>This option is only used if tileUrlProvider is not used.</em></dd>
+
+			<dt>tileExtension [string]</dt>
+			<dd>The file name extension of the tiles (also determines the image type of the tiles). <em>This option is only used if tileUrlProvider is not used.</em></dd>
+
+			<dt>tileSize [int]</dt>
+			<dd>The size of each tile, used to calculate the placement of tiles.</em></dd>
+			<dt>initialZoom [int]</dt>
+			<dd>The initial zoom level used when loading up the viewer.</em></dd>
+
+			<dt>maxZoom [int]</dt>
+			<dd>The max zoom level the viewer is capable of displaying using the generated tiles.</dd>
+
+			<dt>initialPan [coordinates]</dt>
+			<dd>An object, in the form {0, 0} that determines the initial pan (placement) of the image within the viewer.</dd>
+
+			<dt>blankTile [url]</dt>
+			<dd>The url of an image that is used when there is no tile to display (such as at the edges of the image).</dd>
+
+			<dt>loadingTile [url]</dt>
+			<dd>An image to be used when the tile is loading, but before it is made visible.</dd>
+		</dl>
+		<h3>Global Settings</h3>
+		<p>The following options are provided on a global level, many of which are used as fallback values if an override is not provided in the options of the constructor.</p>
+		<dl>
+			<dt>PanoJS.TILE_BASE_URI</dt>
+			<dd>The relative or absolute URI that is prepended to the tile file name.</dd>
+			<dt>PanoJS.TILE_PREFIX</dt>
+			<dd>The prefix for each tile file name.</dd>
+			<dt>PanoJS.TILE_EXTENSION</dt>
+			<dd>The extension of the tile image, which also determines file type.</dd>
+			<dt>PanoJS.TILE_SIZE</dt>
+			<dd>The size of the image tiles, in pixels.</dd>
+			<dt>PanoJS.BLANK_TILE_IMAGE</dt>
+			<dd>The image to be displayed when there is no tile to display (such as at the boundaries of the image).</dd>
+			<dt>PanoJS.LOADING_TILE_IMAGE</dt>
+			<dd>The image to be displayed when a tile is loading but not yet revealed.</dd>
+			<dt>PanoJS.INITIAL_PAN</dt>
+			<dd>The coordinates of the inital pan of the viewer on initialization.</dd>
+			<dt>PanoJS.USE_LOADER_IMAGE</dt>
+			<dd>Determines if the loading image should be used.</dd>
+			<dt>PanoJS.USE_SLIDE</dt>
+			<dd>Should the image smooth slide to position when repositioning.</dd>
+			<dt>PanoJS.USE_KEYBOARD</dt>
+			<dd>Should keyboard events be captured to allow control for panning of the image.</dd>
+			<dt>PanoJS.MOVE_THROTTLE</dt>
+			<dd>The number of events that should be discarded before moving the image.  Helps performance.</dd>
+			<dt>PanoJS.SLIDE_DELAY</dt>
+			<dd>The number of milliseconds of pause before sliding to reposition.</dd>
+			<dt>PanoJS.SLIDE_ACCELERATION_FACTOR</dt>
+			<dd>The multiplier used to speed of the sliding over time.</dd>
+		</dl>
+	</body>
+</html>

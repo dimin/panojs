@@ -1,0 +1,53 @@
+PanoJS3 1.0.0 (2011-01-14) by Dmitry Fedorov:
+  * controls UI works for iPhone, iPad and Android
+  * support for more events: scroll wheel for zoom, touch events (zoom, scroll)
+  * support multiple instances
+  * allow view scale beyond 100%
+  * good full window support
+  * pre-cache tiles in the first row outside of visible area
+  * one line instantiator
+  * google maps like controls - zoomin on double click
+  * center on one click
+  * fixed several problems showing tiles
+  * small info text about the state: scale, etc...
+  * thumbnail navigation
+  * IE is again supported - partially, maybe somebody can help?
+  * Use ExtJS for events
+  * refactoring JavaScript classes
+  * provide tile providers: imgcnv, bisque, zoomify and embedded python script
+
+PanoJS 1.0.2 (2009-01-01) by Dan Allen:
+	* renamed project to PanoJS
+	* change license to Apache License 2.0
+	* move project to Google Code
+	* respect max zoom level when scaling to window
+	* don't alert if max zoom size is exceeded when message is null
+
+GSIV 1.0.1 (2006-03-16) by Dan Allen:
+	* added localization for two warning messages
+	* fixed the TileUrlProvider checking in the constructor
+	* added GSIV.isInstance to check for an instance of a class
+	* fixed python script to allow for missing background color parameter
+
+GSIV 1.0.0 (2006-02-26) by Dan Allen:
+	* completely new object-oriented design
+	* use json options format
+	* optimized performance (both in drag, rendering and zoom)
+	* fixed rounding error in tile placement that lead to artifact lines
+	* added upper zoom limit
+	* added initial pan option
+	* added observers that can send viewer events to listeners
+	* double-click to recenter
+	* smooth motion when repositioning
+	* method to position absolutely (recenter on absolute point)
+	* method to fit to window (resize)
+	* additional options for file names and extensions
+	* preloading image tiles (loading animation)
+	* prevent from scrolling outside of original image boundary (uses blank	tile)
+	* throttle mouse move events to increase performance
+	* cross-browser mouse cursor implementation that represent dragging
+	* account for scroll offset of page when calculating coordinates
+	* keyboard events for movement (initial attempt)
+	* new tilemaker.py python script, using a cleaner design and additional options
+
+GSV 1.0 (2005) by Michal Migurski

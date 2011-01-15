@@ -14,6 +14,11 @@
   height: 0;
 }
 
+.viewer img {
+  margin: 0px;
+  float: none;  
+}
+
 .viewer .well, .viewer .surface {
   margin: 0;
   padding: 0;
