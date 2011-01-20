@@ -73,10 +73,12 @@ function PanoControls(viewer) {
 }
 
 PanoControls.prototype.initControls = function() {
+  if (PanoJS.CONTROL_UPDATED_URLS) return;
   PanoJS.CONTROL_ZOOMIN.image   = PanoJS.STATIC_BASE_URL+PanoJS.CONTROL_ZOOMIN.image;
   PanoJS.CONTROL_ZOOM11.image   = PanoJS.STATIC_BASE_URL+PanoJS.CONTROL_ZOOM11.image;
   PanoJS.CONTROL_ZOOMOUT.image  = PanoJS.STATIC_BASE_URL+PanoJS.CONTROL_ZOOMOUT.image;
   PanoJS.CONTROL_MAXIMIZE.image = PanoJS.STATIC_BASE_URL+PanoJS.CONTROL_MAXIMIZE.image;
+  PanoJS.CONTROL_UPDATED_URLS   = true;
 }
 
 PanoControls.prototype.createDOMElements = function() {

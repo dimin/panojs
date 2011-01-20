@@ -35,8 +35,8 @@ function ThumbnailControl(viewer) {
   this.scale = 1;
   this.x = 0;
   this.y = 0;  
-  this.width = 50;  
-  this.height = 50; 
+  this.width = 128;  
+  this.height = 128; 
   
   this.viewer.addViewerMovedListener(this);
   this.viewer.addViewerZoomedListener(this);
@@ -47,9 +47,11 @@ function ThumbnailControl(viewer) {
 }
 
 ThumbnailControl.prototype.initControls = function() {
+  if (PanoJS.CONTROL_THUMBNAIL_UPDATED_URLS) return;
   PanoJS.CONTROL_IMAGE_PLUS     = PanoJS.STATIC_BASE_URL + PanoJS.CONTROL_IMAGE_PLUS;
   PanoJS.CONTROL_IMAGE_MINUS    = PanoJS.STATIC_BASE_URL + PanoJS.CONTROL_IMAGE_MINUS;
   PanoJS.CONTROL_IMAGE_PROGRESS = PanoJS.STATIC_BASE_URL + PanoJS.CONTROL_IMAGE_PROGRESS;  
+  PanoJS.CONTROL_THUMBNAIL_UPDATED_URLS = true;
 }
 
 ThumbnailControl.prototype.update = function() {
