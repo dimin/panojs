@@ -121,6 +121,8 @@ PanoJS.REVISION_FLAG = '';
 
 // CSS definition settings
 PanoJS.SURFACE_STYLE_CLASS  = 'surface';
+PanoJS.SURFACE_ID           = 'viewer_contorls_surface';
+PanoJS.SURFACE_STYLE_ZINDEX = 20;
 PanoJS.WELL_STYLE_CLASS     = 'well';
 PanoJS.CONTROLS_STYLE_CLASS = 'controls'
 PanoJS.TILE_STYLE_CLASS     = 'tile';
@@ -139,7 +141,6 @@ PanoJS.LOADING_TILE_IMAGE = 'blank.gif';
 PanoJS.INITIAL_PAN = { 'x' : .5, 'y' : .5 };
 PanoJS.USE_LOADER_IMAGE = true;
 PanoJS.USE_SLIDE = true;
-PanoJS.USE_KEYBOARD = true;
 
 // dima
 if (!PanoJS.STATIC_BASE_URL) PanoJS.STATIC_BASE_URL = '';
@@ -157,13 +158,15 @@ PanoJS.USE_WHEEL_FOR_ZOOM = (navigator.userAgent.indexOf("Mac OS X")>0 ? false: 
 PanoJS.WHEEL_SCALE = (navigator.userAgent.toLowerCase().indexOf('chrome')>-1 ? 1 : 40);
 
 // dima: keys used by keyboard handlers
+// right now event is attached to 'document', can't make sure which element is current, skip for now
+PanoJS.USE_KEYBOARD = false;
+PanoJS.KEY_MOVE_THROTTLE = 15;
 PanoJS.KEY_UP    = 38;
 PanoJS.KEY_DOWN  = 40;
 PanoJS.KEY_RIGHT = 39;
 PanoJS.KEY_LEFT  = 37;
-PanoJS.KEY_MINUS = 109;
-PanoJS.KEY_PLUS  = 107;
-
+PanoJS.KEY_MINUS = {109:0, 189:0};
+PanoJS.KEY_PLUS  = {107:0, 187:0};
 
 // performance tuning variables
 PanoJS.MOVE_THROTTLE = 3;
@@ -220,8 +223,10 @@ PanoJS.prototype.init = function() {
     if (!this.surface) {
       this.surface = document.createElement('div');
       this.surface.className = PanoJS.SURFACE_STYLE_CLASS;
+      this.surface.id = PanoJS.SURFACE_ID;
       this.viewer.appendChild(this.surface); 
       this.surface.style.cursor = PanoJS.GRAB_MOUSE_CURSOR;
+      this.surface.style.zIndex = PanoJS.SURFACE_STYLE_ZINDEX;
     }
      
     if (!this.well) {
@@ -255,10 +260,8 @@ PanoJS.prototype.init = function() {
     this.ui_listener.onmouseout    = callback(this, this.mouseReleasedHandler);
     this.ui_listener.oncontextmenu = function() {return false;}; 
     this.ui_listener.ondblclick    = callback(this, this.doubleClickHandler);
-    if (PanoJS.USE_KEYBOARD) {
-      window.onkeypress = callback(this, this.keyboardMoveHandler);
-      window.onkeydown  = callback(this, this.keyboardZoomHandler);
-    }
+    if (PanoJS.USE_KEYBOARD)
+      document.onkeydown  = callback(this, this.keyboardHandler);
 
     this.ui_listener.onmousewheel = callback(this, this.mouseWheelHandler);
     // dima: Firefox standard
@@ -1033,9 +1036,9 @@ PanoJS.prototype.mouseScrollHandler = function(e) {
   
   // Here we only have delta Y, so for firefox only Zoom will be implemented
   //var wheelData = e.detail * -1 * PanoJS.WHEEL_SCALE; // adjust delta value in sync with Webkit    
-  if (e.detail<0) this.zoom(-1);
+  if (e.detail<0) this.zoom(1);
   else                
-  if (e.detail>0) this.zoom(1);
+  if (e.detail>0) this.zoom(-1);
   
   return false;  
 };
@@ -1044,32 +1047,42 @@ PanoJS.prototype.mouseScrollHandler = function(e) {
 // keyboard events
 //----------------------------------------------------------------------
 
-PanoJS.prototype.keyboardMoveHandler = function(e) {
+PanoJS.prototype.keyboardHandler = function(e) {
+  if (!PanoJS.USE_KEYBOARD) return;  
   e = e ? e : window.event;
-  if (e.keyCode == PanoJS.KEY_UP) {
-      this.positionTiles({'x': 0,'y': -PanoJS.MOVE_THROTTLE}, true);
-      return false;      
-  } else if (e.keyCode == PanoJS.KEY_RIGHT) {
-      this.positionTiles({'x': -PanoJS.MOVE_THROTTLE,'y': 0}, true);
-      return false;      
-  } else if (e.keyCode == PanoJS.KEY_DOWN) {
-      this.positionTiles({'x': 0,'y': PanoJS.MOVE_THROTTLE}, true);
-      return false;      
-  } else if (e.keyCode == PanoJS.KEY_LEFT) {
-      this.positionTiles({'x': PanoJS.MOVE_THROTTLE,'y': 0}, true);
-      return false;
-  }
-}
-
-PanoJS.prototype.keyboardZoomHandler = function(e) {
-  e = e ? e : window.event;
-  if (e.keyCode == PanoJS.KEY_MINUS) {
+  var key = e.keyCode ? e.keyCode : e.which;
+  
+  if (key in PanoJS.KEY_MINUS) {
+      this.blockPropagation(e); 
       this.zoom(-1);
       return false;      
-  } else if (e.keyCode == PanoJS.KEY_PLUS) {
+  } else 
+  if (key in PanoJS.KEY_PLUS) {
+      this.blockPropagation(e); 
       this.zoom(1);
       return false;
-  }
+  } else
+  if (key == PanoJS.KEY_UP) {
+      this.blockPropagation(e); 
+      this.moveViewerBy({'x': 0,'y': -PanoJS.KEY_MOVE_THROTTLE});
+      return false;      
+  } else 
+  if (key == PanoJS.KEY_RIGHT) {
+      this.blockPropagation(e); 
+      this.moveViewerBy({'x': PanoJS.KEY_MOVE_THROTTLE,'y': 0});      
+      return false;      
+  } else 
+  if (key == PanoJS.KEY_DOWN) {
+      this.blockPropagation(e); 
+      this.moveViewerBy({'x': 0,'y': PanoJS.KEY_MOVE_THROTTLE});      
+      return false;      
+  } else 
+  if (key == PanoJS.KEY_LEFT) {
+      this.blockPropagation(e); 
+       this.moveViewerBy({'x': -PanoJS.KEY_MOVE_THROTTLE,'y': 0});      
+      return false;
+  }  
+  
 }
 
 //----------------------------------------------------------------------

@@ -46,8 +46,7 @@ function BisqueISPyramid( width, height, tilesize ) {
     var level_width = width;    
     var level_height = height;   
     var min_size = (tilesize / 2) + 1;
-    while (level_width > min_size || level_height > min_size ) {      
-    //while (level_width > tilesize | level_height > tilesize ) {
+    while (level_id==0 || level_width > min_size || level_height > min_size ) {      
         var level = new BisqueISLevel( level_width, level_height, tilesize, level_id );
         this._pyramid.push( level );
         level_width  = Math.floor( level_width / 2 );
