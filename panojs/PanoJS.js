@@ -146,6 +146,7 @@ PanoJS.USE_SLIDE = true;
 if (!PanoJS.STATIC_BASE_URL) PanoJS.STATIC_BASE_URL = '';
 PanoJS.CREATE_CONTROLS = true;
 PanoJS.CREATE_INFO_CONTROLS = true;
+PanoJS.CREATE_OSD_CONTROLS = true;
 PanoJS.CREATE_THUMBNAIL_CONTROLS = (isClientPhone() ? false : true);
 
 PanoJS.MAX_OVER_ZOOM = 2;
@@ -244,6 +245,10 @@ PanoJS.prototype.init = function() {
       this.info_control = new InfoControl(this);
     }          
 
+    if (PanoJS.CREATE_OSD_CONTROLS && !this.osd_control) {
+      this.osd_control = new OsdControl(this);
+    }     
+  
     if (PanoJS.CREATE_THUMBNAIL_CONTROLS && !this.thumbnail_control) {
       this.thumbnail_control = new ThumbnailControl(this);
     }     
@@ -854,6 +859,12 @@ PanoJS.prototype.toggleMaximize = function() {
       vd.style.height   = '100%'; 
       document.body.style.overflow = 'hidden';
       document.body.style.padding = '0';
+      if (isMobileSafari()) {
+        vd.style.left = window.scrollX + 'px';
+        vd.style.top  = window.scrollY + 'px';
+        vd.style.width    = window.innerWidth + 'px';
+        vd.style.height   = window.innerHeight + 'px';        
+      }
   } else {
       document.body.style.padding = this.document_style.padding;
       document.body.style.overflow = this.document_style.overflow;          
@@ -1130,6 +1141,8 @@ PanoJS.prototype.gestureStartHandler = function(e) {
   e = e ? e : window.event;
   if (e == null) return false;  
   this.blockPropagation(e);
+  this.gesture_current_scale = 1.0;
+  this.gesture_image_scale = this.currentScale();  
   return false;              
 }
 
@@ -1137,6 +1150,22 @@ PanoJS.prototype.gestureChangeHandler = function(e) {
   e = e ? e : window.event;
   if (e == null) return false;  
   this.blockPropagation(e);      
+  
+  if (e.scale/this.gesture_current_scale>2.0) {
+    this.gesture_current_scale = e.scale;
+    this.zoom(1);
+  } else 
+  if (e.scale/this.gesture_current_scale<0.5) {
+    this.gesture_current_scale = e.scale;
+    this.zoom(-1);
+  }
+  
+  if (this.osd_control) {
+    e.image_scale = this.gesture_image_scale;
+    e.gesture_current_scale = this.gesture_current_scale;
+    this.osd_control.viewerZooming(e); 
+  }
+  
   return false;       
 }
 
@@ -1144,11 +1173,12 @@ PanoJS.prototype.gestureEndHandler = function(e) {
   e = e ? e : window.event;
   if (e == null) return false;  
   this.blockPropagation(e);      
+  if (this.osd_control) this.osd_control.show(false);
   
   // e.scale e.rotation
-  if (e.scale>1) this.zoom(1);
-  else
-  if (e.scale<1) this.zoom(-1);  
+  //if (e.scale>1) this.zoom(1);
+  //else
+  //if (e.scale<1) this.zoom(-1);  
   return false;       
 }
 
