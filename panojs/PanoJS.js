@@ -444,6 +444,18 @@ PanoJS.prototype.removeTileFromWell = function(tile) {
  * routine, delaying the appearance of the tile until it is fully
  * loaded, if configured to do so.
  */
+function forceImageSizeToFitScale(imageElement, scale) {
+	if (scale != 1) {
+      if (tileImg.naturalWidth && tileImg.naturalHeight && tileImg.naturalWidth>0 && tileImg.naturalHeight>0) {
+        imageElement.style.width = tileImg.naturalWidth*scale + 'px';
+        imageElement.style.height = tileImg.naturalHeight*scale + 'px';
+      } else
+      if (isIE() && tileImg.offsetWidth>0 && tileImg.offsetHeight>0) { // damn IE does not have naturalWidth ...
+        imageElement.style.width = tileImg.offsetWidth*scale + 'px';
+        imageElement.style.height = tileImg.offsetHeight*scale + 'px';
+      }
+    }
+}
 PanoJS.prototype.assignTileImage = function(tile) {
     // check if image has been scrolled too far in any particular direction
     // and if so, use the null tile image
@@ -491,15 +503,7 @@ PanoJS.prototype.assignTileImage = function(tile) {
     else
       tileImg.done = true;
 
-    //if (tileImg.done)  
-    if (tileImg.naturalWidth && tileImg.naturalHeight && tileImg.naturalWidth>0 && tileImg.naturalHeight>0) {
-      tileImg.style.width = tileImg.naturalWidth*scale + 'px';
-      tileImg.style.height = tileImg.naturalHeight*scale + 'px';   
-    } else 
-    if (isIE() && tileImg.offsetWidth>0 && tileImg.offsetHeight>0) { // damn IE does not have naturalWidth ...
-      tileImg.style.width = tileImg.offsetWidth*scale + 'px';
-      tileImg.style.height = tileImg.offsetHeight*scale + 'px';         
-    }
+    forceImageSizeToFitScale(tileImg, scale);
 
     if ( tileImg.done || !tileImg.delayed_loading &&
          (useBlankImage || !PanoJS.USE_LOADER_IMAGE || tileImg.complete || (tileImg.image && tileImg.image.complete))  ) {
@@ -519,14 +523,7 @@ PanoJS.prototype.assignTileImage = function(tile) {
       tileImg.onload = function() {
         // make sure our destination is still present
         if (loadingImg.parentNode && loadingImg.targetSrc == tileImgId) {
-          if (tileImg.naturalWidth && tileImg.naturalHeight && tileImg.naturalWidth>0 && tileImg.naturalHeight>0) {
-            tileImg.style.width = tileImg.naturalWidth*scale + 'px';
-            tileImg.style.height = tileImg.naturalHeight*scale + 'px'; 
-          } else 
-          if (isIE() && tileImg.offsetWidth>0 && tileImg.offsetHeight>0) { // damn IE does not have naturalWidth ...
-            tileImg.style.width = tileImg.offsetWidth*scale + 'px';
-            tileImg.style.height = tileImg.offsetHeight*scale + 'px';         
-          }          
+          forceImageSizeToFitScale(tileImg, scale);
           well.replaceChild(tileImg, loadingImg);
           tile.element = tileImg;
           tile.updatePosition();
