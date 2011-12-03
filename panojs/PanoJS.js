@@ -443,26 +443,23 @@ PanoJS.prototype.removeTileFromWell = function(tile) {
  * routine, delaying the appearance of the tile until it is fully
  * loaded, if configured to do so.
  */
-PanoJS.prototype.assignTileImage = function(tile) {    
-    var tileImgId, src;
-    var useBlankImage = false;
-        
+PanoJS.prototype.assignTileImage = function(tile) {
     // check if image has been scrolled too far in any particular direction
     // and if so, use the null tile image
-    if (!useBlankImage) {
-      var left = tile.xIndex < 0;
-      var high = tile.yIndex < 0;
-      
-      // dima: allow zooming in more than 100%
-      var cur_size = this.currentImageSize();      
-      var right = tile.xIndex*this.tileSize >= cur_size.width;
-      var low   = tile.yIndex*this.tileSize >= cur_size.height;              
-            
-      if (high || left || low || right) {
-        useBlankImage = true;
-      }
+    var left = tile.xIndex < 0;
+    var high = tile.yIndex < 0;
+
+    // dima: allow zooming in more than 100%
+    var cur_size = this.currentImageSize();
+    var right = tile.xIndex*this.tileSize >= cur_size.width;
+    var low   = tile.yIndex*this.tileSize >= cur_size.height;
+
+    var useBlankImage = false;
+    if (high || left || low || right) {
+      useBlankImage = true;
     }
 
+    var tileImgId, src;
     if (useBlankImage) {
       tileImgId = 'blank';
       src = this.cache['blank'].src;
