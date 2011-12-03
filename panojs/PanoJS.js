@@ -430,9 +430,8 @@ PanoJS.prototype.positionTiles = function(motion, reset) {
 };
     
 PanoJS.prototype.removeTileFromWell = function(tile) {        
-    if (!tile || !tile.element || !tile.element.parentNode) return;
-    this.well.removeChild(tile.element);   
-    tile.element = null;      
+    if (tile)
+      tile.setImageElement(null);
 };
     
    
@@ -511,7 +510,7 @@ PanoJS.prototype.assignTileImage = function(tile) {
       if (tileImg.image) tileImg.image.onload = null;
             
       if (tileImg.parentNode == null) {
-        tile.element = this.well.appendChild(tileImg);
+        tile.setImageElement(this.well.appendChild(tileImg));
       }  
       tileImg.done = true;      
     } else {
@@ -519,19 +518,18 @@ PanoJS.prototype.assignTileImage = function(tile) {
       loadingImg.targetSrc = tileImgId;
             
       var well = this.well;
-      tile.element = well.appendChild(loadingImg);
+      tile.setImageElement(well.appendChild(loadingImg));
       tileImg.onload = function() {
         // make sure our destination is still present
         if (loadingImg.parentNode && loadingImg.targetSrc == tileImgId) {
           forceImageSizeToFitScale(tileImg, scale);
           well.replaceChild(tileImg, loadingImg);
-          tile.element = tileImg;
+          tile.setImageElement(tileImg);
           tile.updatePosition();
         } else {
           // delete a tile if the destination is not present anymore
           if (loadingImg.parentNode) {
-            well.removeChild(loadingImg);   
-            tile.element = null;      
+            tile.setImageElement(null);
           }           
         }
                 
@@ -724,6 +722,9 @@ PanoJS.prototype.blank = function() {
         this.well.removeChild(img);
       }
     }
+    // Loading images can be in the well so we fully empty the well.
+    while(this.well.firstChild)
+      this.well.removeChild(this.well.firstChild);
     this.resetCache();
 };
     
@@ -1245,6 +1246,12 @@ Tile.prototype.updatePosition = function() {
   var element = this.element;
   if (element)
     element.positionAbsolutely(this.posx, this.posy);
+}
+
+Tile.prototype.setImageElement = function(imgElement) {
+  if (this.element && this.element.parentNode)
+    this.element.parentNode.removeChild(this.element);
+  this.element = imgElement;
 }
 
 //-------------------------------------------------------
