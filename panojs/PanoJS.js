@@ -521,8 +521,6 @@ PanoJS.prototype.assignTileImage = function(tile) {
       tileImg.onload = function() {
         // make sure our destination is still present
         if (loadingImg.parentNode && loadingImg.targetSrc == tileImgId) {
-          tileImg.style.top = loadingImg.style.top;
-          tileImg.style.left = loadingImg.style.left;
           if (tileImg.naturalWidth && tileImg.naturalHeight && tileImg.naturalWidth>0 && tileImg.naturalHeight>0) {
             tileImg.style.width = tileImg.naturalWidth*scale + 'px';
             tileImg.style.height = tileImg.naturalHeight*scale + 'px'; 
@@ -533,6 +531,7 @@ PanoJS.prototype.assignTileImage = function(tile) {
           }          
           well.replaceChild(tileImg, loadingImg);
           tile.element = tileImg;
+          tile.updatePosition();
         } else {
           // delete a tile if the destination is not present anymore
           if (loadingImg.parentNode) {
@@ -558,12 +557,8 @@ PanoJS.prototype.assignTileImage = function(tile) {
         tileImg.image.src = tileImg.src;
       }
     }
-    
-    if (tile.element) {
-      tile.element.style.top = tile.posy + 'px';
-      tile.element.style.left = tile.posx + 'px';    
-    }
-    
+
+    tile.updatePosition();
 };
 
 PanoJS.prototype.createPrototype = function(src, src_to_load) {        
@@ -1235,7 +1230,21 @@ PanoJS.ResizeEvent = function(x, y, width, height) {
 //-------------------------------------------------------
 // Tile
 //-------------------------------------------------------
-    
+
+function updatePositionAbsolute() {
+  var element = this.element;
+  if (element) {
+    element.style.left = this.posx + 'px';
+    element.style.top = this.posy + 'px';
+  }
+}
+
+function updatePositionWebKitTranslate() {
+  var element = this.element;
+  if (element)
+    this.element.style.webkitTransform = 'translate(' + this.posx + 'px, ' + this.posy + 'px) translateZ(0)';
+}
+
 function Tile(viewer, x, y) {
     this.viewer = viewer;  
     this.element = null;
@@ -1245,6 +1254,11 @@ function Tile(viewer, x, y) {
     this.yIndex = y;
     this.qx = x;
     this.qy = y;
+    // FIXME: Just use Object.defineProperty() once Internet Explorer disappeared.
+    if ('webkitTransform' in document.body.style)
+      this.updatePosition = updatePositionWebKitTranslate;
+    else
+      this.updatePosition = updatePositionAbsolute;
 };
 
 Tile.prototype.createDOMElements = function() {
