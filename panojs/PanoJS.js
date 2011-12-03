@@ -825,7 +825,6 @@ PanoJS.prototype.resize = function() {
   this.height = newHeight;
       
   this.prepareTiles();
-  this.positionTiles();
   this.viewer.style.display = '';
   this.initialized = true;
   this.notifyViewerMoved();
