@@ -29,6 +29,7 @@
  Copyright (c) 2005 Michal Migurski <mike-gsv@teczno.com>
                     Dan Allen <dan.allen@mojavelinux.com>
                2010 Dmitry Fedorov, Center for Bio-Image Informatics <fedorov@ece.ucsb.edu>
+               2011 Benjamin Poulain <benjamin@webkit.org>
   
  Redistribution and use in source form, with or without modification,
  are permitted provided that the following conditions are met:
