@@ -1225,20 +1225,6 @@ PanoJS.ResizeEvent = function(x, y, width, height) {
 // Tile
 //-------------------------------------------------------
 
-function updatePositionAbsolute() {
-  var element = this.element;
-  if (element) {
-    element.style.left = this.posx + 'px';
-    element.style.top = this.posy + 'px';
-  }
-}
-
-function updatePositionWebKitTranslate() {
-  var element = this.element;
-  if (element)
-    this.element.style.webkitTransform = 'translate(' + this.posx + 'px, ' + this.posy + 'px) translateZ(0)';
-}
-
 function Tile(viewer, x, y) {
     this.viewer = viewer;  
     this.element = null;
@@ -1248,16 +1234,18 @@ function Tile(viewer, x, y) {
     this.yIndex = y;
     this.qx = x;
     this.qy = y;
-    // FIXME: Just use Object.defineProperty() once Internet Explorer disappeared.
-    if ('webkitTransform' in document.body.style)
-      this.updatePosition = updatePositionWebKitTranslate;
-    else
-      this.updatePosition = updatePositionAbsolute;
 };
 
 Tile.prototype.createDOMElements = function() {
     //this.dom_info.innerHTML = "";
 };
+
+// FIXME: Just use Object.defineProperty() on posx, posy once Internet Explorer disappeared.
+Tile.prototype.updatePosition = function() {
+  var element = this.element;
+  if (element)
+    element.positionAbsolutely(this.posx, this.posy);
+}
 
 //-------------------------------------------------------
 // TileUrlProvider
