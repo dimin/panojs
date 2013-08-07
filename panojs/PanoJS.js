@@ -156,7 +156,11 @@ PanoJS.PRE_CACHE_AMOUNT = 3; // 1 - only visible, 2 - more, 3 - even more
 // The dafault is to pan with wheel events on a mac and zoom on other systems
 PanoJS.USE_WHEEL_FOR_ZOOM = (navigator.userAgent.indexOf("Mac OS X")>0 ? false: true);
 // the deltas on Firefox and Chrome are 40 times smaller than on Safari or IE
-PanoJS.WHEEL_SCALE = (navigator.userAgent.toLowerCase().indexOf('chrome')>-1 ? 1 : 40);
+var currentUserAgent = navigator.userAgent.toLowerCase();
+var firefoxOrChrome = currentUserAgent.indexOf('chrome')  > -1 ? true
+                    : currentUserAgent.indexOf('firefox') > -1 ? true
+                    : false
+PanoJS.WHEEL_SCALE = ( firefoxOrChrome ? 1 : 40);
 
 // dima: keys used by keyboard handlers
 // right now event is attached to 'document', can't make sure which element is current, skip for now
