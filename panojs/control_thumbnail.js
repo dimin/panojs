@@ -6,6 +6,7 @@
   @author Dmitry Fedorov  <fedorov@ece.ucsb.edu>   
   
   Copyright (c) 2010 Dmitry Fedorov, Center for Bio-Image Informatics
+  Copyright (c) 2011 Benjamin Poulain <benjamin@webkit.org>
   
   using: isClientTouch() and isClientPhone() from utils.js
 
@@ -180,13 +181,11 @@ ThumbnailControl.prototype.viewerMoved = function(e) {
     if (img_x<0) w += img_x;
     if (img_y<0) h += img_y;  
 
-    this.dom_roi.style.left = tx + 'px';
-    this.dom_roi.style.top  = ty + 'px';   
+    this.dom_roi.positionAbsolutely(tx, ty);
     this.dom_roi.style.width = Math.min(w*this.thumbscale-2, this.tw-tx-PanoJS.CONTROL_THUMBNAIL_BORDER) + 'px';
     this.dom_roi.style.height = Math.min(h*this.thumbscale-2, this.th-ty-PanoJS.CONTROL_THUMBNAIL_BORDER) + 'px';
-    
-    this.dom_roi_prev.style.left = tx + 'px';
-    this.dom_roi_prev.style.top  = ty + 'px';   
+
+    this.dom_roi_prev.positionAbsolutely(tx, ty);
     this.dom_roi_prev.style.width = Math.min(w*this.thumbscale-2, this.tw-tx-PanoJS.CONTROL_THUMBNAIL_BORDER) + 'px';
     this.dom_roi_prev.style.height = Math.min(h*this.thumbscale-2, this.th-ty-PanoJS.CONTROL_THUMBNAIL_BORDER) + 'px';    
 }
@@ -223,8 +222,7 @@ ThumbnailControl.prototype.movePreview = function (e) {
     var my = e.offsetY != undefined ? e.offsetY : e.layerY; 
     mx -= this.dom_roi_prev.offsetWidth/2;
     my -= this.dom_roi_prev.offsetHeight/2;    
-    this.dom_roi_prev.style.left = mx + 'px';
-    this.dom_roi_prev.style.top  = my + 'px'; 
+    this.dom_roi_prev.positionAbsolutely(tx, ty);
 }
 
 ThumbnailControl.prototype.moveViewerNow = function (e) {

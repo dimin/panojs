@@ -29,6 +29,7 @@
  Copyright (c) 2005 Michal Migurski <mike-gsv@teczno.com>
                     Dan Allen <dan.allen@mojavelinux.com>
                2010 Dmitry Fedorov, Center for Bio-Image Informatics <fedorov@ece.ucsb.edu>
+               2011 Benjamin Poulain <benjamin@webkit.org>
   
  Redistribution and use in source form, with or without modification,
  are permitted provided that the following conditions are met:
@@ -433,9 +434,8 @@ PanoJS.prototype.positionTiles = function(motion, reset) {
 };
     
 PanoJS.prototype.removeTileFromWell = function(tile) {        
-    if (!tile || !tile.element || !tile.element.parentNode) return;
-    this.well.removeChild(tile.element);   
-    tile.element = null;      
+    if (tile)
+      tile.setImageElement(null);
 };
     
    
@@ -447,26 +447,35 @@ PanoJS.prototype.removeTileFromWell = function(tile) {
  * routine, delaying the appearance of the tile until it is fully
  * loaded, if configured to do so.
  */
-PanoJS.prototype.assignTileImage = function(tile) {    
-    var tileImgId, src;
-    var useBlankImage = false;
-        
-    // check if image has been scrolled too far in any particular direction
-    // and if so, use the null tile image
-    if (!useBlankImage) {
-      var left = tile.xIndex < 0;
-      var high = tile.yIndex < 0;
-      
-      // dima: allow zooming in more than 100%
-      var cur_size = this.currentImageSize();      
-      var right = tile.xIndex*this.tileSize >= cur_size.width;
-      var low   = tile.yIndex*this.tileSize >= cur_size.height;              
-            
-      if (high || left || low || right) {
-        useBlankImage = true;
+function forceImageSizeToFitScale(imageElement, scale) {
+	if (scale != 1) {
+      if (tileImg.naturalWidth && tileImg.naturalHeight && tileImg.naturalWidth>0 && tileImg.naturalHeight>0) {
+        imageElement.style.width = tileImg.naturalWidth*scale + 'px';
+        imageElement.style.height = tileImg.naturalHeight*scale + 'px';
+      } else
+      if (isIE() && tileImg.offsetWidth>0 && tileImg.offsetHeight>0) { // damn IE does not have naturalWidth ...
+        imageElement.style.width = tileImg.offsetWidth*scale + 'px';
+        imageElement.style.height = tileImg.offsetHeight*scale + 'px';
       }
     }
+}
+PanoJS.prototype.assignTileImage = function(tile) {
+    // check if image has been scrolled too far in any particular direction
+    // and if so, use the null tile image
+    var left = tile.xIndex < 0;
+    var high = tile.yIndex < 0;
 
+    // dima: allow zooming in more than 100%
+    var cur_size = this.currentImageSize();
+    var right = tile.xIndex*this.tileSize >= cur_size.width;
+    var low   = tile.yIndex*this.tileSize >= cur_size.height;
+
+    var useBlankImage = false;
+    if (high || left || low || right) {
+      useBlankImage = true;
+    }
+
+    var tileImgId, src;
     if (useBlankImage) {
       tileImgId = 'blank';
       src = this.cache['blank'].src;
@@ -497,15 +506,7 @@ PanoJS.prototype.assignTileImage = function(tile) {
     else
       tileImg.done = true;
 
-    //if (tileImg.done)  
-    if (tileImg.naturalWidth && tileImg.naturalHeight && tileImg.naturalWidth>0 && tileImg.naturalHeight>0) {
-      tileImg.style.width = tileImg.naturalWidth*scale + 'px';
-      tileImg.style.height = tileImg.naturalHeight*scale + 'px';   
-    } else 
-    if (isIE() && tileImg.offsetWidth>0 && tileImg.offsetHeight>0) { // damn IE does not have naturalWidth ...
-      tileImg.style.width = tileImg.offsetWidth*scale + 'px';
-      tileImg.style.height = tileImg.offsetHeight*scale + 'px';         
-    }
+    forceImageSizeToFitScale(tileImg, scale);
 
     if ( tileImg.done || !tileImg.delayed_loading &&
          (useBlankImage || !PanoJS.USE_LOADER_IMAGE || tileImg.complete || (tileImg.image && tileImg.image.complete))  ) {
@@ -513,7 +514,7 @@ PanoJS.prototype.assignTileImage = function(tile) {
       if (tileImg.image) tileImg.image.onload = null;
             
       if (tileImg.parentNode == null) {
-        tile.element = this.well.appendChild(tileImg);
+        tile.setImageElement(this.well.appendChild(tileImg));
       }  
       tileImg.done = true;      
     } else {
@@ -521,27 +522,18 @@ PanoJS.prototype.assignTileImage = function(tile) {
       loadingImg.targetSrc = tileImgId;
             
       var well = this.well;
-      tile.element = well.appendChild(loadingImg);
+      tile.setImageElement(well.appendChild(loadingImg));
       tileImg.onload = function() {
         // make sure our destination is still present
         if (loadingImg.parentNode && loadingImg.targetSrc == tileImgId) {
-          tileImg.style.top = loadingImg.style.top;
-          tileImg.style.left = loadingImg.style.left;
-          if (tileImg.naturalWidth && tileImg.naturalHeight && tileImg.naturalWidth>0 && tileImg.naturalHeight>0) {
-            tileImg.style.width = tileImg.naturalWidth*scale + 'px';
-            tileImg.style.height = tileImg.naturalHeight*scale + 'px'; 
-          } else 
-          if (isIE() && tileImg.offsetWidth>0 && tileImg.offsetHeight>0) { // damn IE does not have naturalWidth ...
-            tileImg.style.width = tileImg.offsetWidth*scale + 'px';
-            tileImg.style.height = tileImg.offsetHeight*scale + 'px';         
-          }          
+          forceImageSizeToFitScale(tileImg, scale);
           well.replaceChild(tileImg, loadingImg);
-          tile.element = tileImg;
+          tile.setImageElement(tileImg);
+          tile.updatePosition();
         } else {
           // delete a tile if the destination is not present anymore
           if (loadingImg.parentNode) {
-            well.removeChild(loadingImg);   
-            tile.element = null;      
+            tile.setImageElement(null);
           }           
         }
                 
@@ -562,12 +554,8 @@ PanoJS.prototype.assignTileImage = function(tile) {
         tileImg.image.src = tileImg.src;
       }
     }
-    
-    if (tile.element) {
-      tile.element.style.top = tile.posy + 'px';
-      tile.element.style.left = tile.posx + 'px';    
-    }
-    
+
+    tile.updatePosition();
 };
 
 PanoJS.prototype.createPrototype = function(src, src_to_load) {        
@@ -738,6 +726,9 @@ PanoJS.prototype.blank = function() {
         this.well.removeChild(img);
       }
     }
+    // Loading images can be in the well so we fully empty the well.
+    while(this.well.firstChild)
+      this.well.removeChild(this.well.firstChild);
     this.resetCache();
 };
     
@@ -834,7 +825,6 @@ PanoJS.prototype.resize = function() {
   this.height = newHeight;
       
   this.prepareTiles();
-  this.positionTiles();
   this.viewer.style.display = '';
   this.initialized = true;
   this.notifyViewerMoved();
@@ -1246,7 +1236,7 @@ PanoJS.ResizeEvent = function(x, y, width, height) {
 //-------------------------------------------------------
 // Tile
 //-------------------------------------------------------
-    
+
 function Tile(viewer, x, y) {
     this.viewer = viewer;  
     this.element = null;
@@ -1261,6 +1251,19 @@ function Tile(viewer, x, y) {
 Tile.prototype.createDOMElements = function() {
     //this.dom_info.innerHTML = "";
 };
+
+// FIXME: Just use Object.defineProperty() on posx, posy once Internet Explorer disappeared.
+Tile.prototype.updatePosition = function() {
+  var element = this.element;
+  if (element)
+    element.positionAbsolutely(this.posx, this.posy);
+}
+
+Tile.prototype.setImageElement = function(imgElement) {
+  if (this.element && this.element.parentNode)
+    this.element.parentNode.removeChild(this.element);
+  this.element = imgElement;
+}
 
 //-------------------------------------------------------
 // TileUrlProvider
