@@ -263,7 +263,7 @@ PanoJS.prototype.init = function() {
 
     // dima: Setup UI events
     this.ui_listener = this.surface;
-    if (isIE()) this.ui_listener = this.viewer; // issues with IE, hack it
+    if (isIE() || isAndroid()) this.ui_listener = this.viewer; // issues with IE, hack it
     
     this.ui_listener.onmousedown   = callback(this, this.mousePressedHandler);
     this.ui_listener.onmouseup     = callback(this, this.mouseReleasedHandler);
@@ -283,7 +283,7 @@ PanoJS.prototype.init = function() {
     this.ui_listener.ontouchmove     = callback(this, this.touchMoveHandler);
     this.ui_listener.ongesturestart  = callback(this, this.gestureStartHandler);
     this.ui_listener.ongesturechange = callback(this, this.gestureChangeHandler);
-    this.ui_listener.ongestureend    = callback(this, this.gestureEndHandler);        
+    this.ui_listener.ongestureend    = callback(this, this.gestureEndHandler);
         
     // notify listners
     this.notifyViewerZoomed();    
