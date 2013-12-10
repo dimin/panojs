@@ -60,6 +60,8 @@ function PanoJS(viewer, options) {
   this.viewerZoomedListeners = [];
   // listeners that are notified on a resize event
   this.viewerResizedListeners = [];
+  // listeners that are notified on a recenter event
+  this.viewerRecenteredListeners = [];
     
     
   if (typeof viewer == 'string')
@@ -605,9 +607,13 @@ PanoJS.prototype.addViewerZoomedListener = function(listener) {
     this.viewerZoomedListeners.push(listener);
 };
 
-PanoJS.prototype.addViewerResizedListener = function(listener) {      
+PanoJS.prototype.addViewerResizedListener = function(listener) {
     this.viewerResizedListeners.push(listener);
 };  
+
+PanoJS.prototype.addViewerRecenteredListener = function(listener) {
+    this.viewerRecenteredListeners.push(listener);
+};
     
 // Notify listeners of a zoom event on the viewer.
 PanoJS.prototype.notifyViewerZoomed = function() {         
@@ -640,6 +646,17 @@ PanoJS.prototype.notifyViewerMoved = function(coords) {
                                                                     )
                                               );
     }
+};
+
+// Notify listeners the viewer has finished recentering, passes end coordinates
+PanoJS.prototype.notifyViewerRecentered = function(coords) {
+	if (typeof coords == 'undefined') {
+	  coords = { 'x' : 0, 'y' : 0 };
+	}
+	
+	for (var i = 0; i < this.viewerRecenteredListeners.length; i++) {
+	  this.viewerRecenteredListeners[i].viewerRecentered( new PanoJS.RecenterEvent(coords.x, coords.y) );
+	}
 };
 
 PanoJS.prototype.zoom = function(direction) {       
@@ -770,6 +787,7 @@ PanoJS.prototype.recenter = function(coords, absolute, skip_motion) {
   };
       
   if (motion.x == 0 && motion.y == 0) {
+	this.notifyViewerRecentered(coords);
     return;
   }
       
@@ -1228,6 +1246,11 @@ PanoJS.ResizeEvent = function(x, y, width, height) {
   this.y = y;
   this.width = width;
   this.height = height;
+};
+
+PanoJS.RecenterEvent = function(x, y) {
+  this.x = x;
+  this.y = y;
 };
 
 
