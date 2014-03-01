@@ -449,15 +449,15 @@ PanoJS.prototype.removeTileFromWell = function(tile) {
  * routine, delaying the appearance of the tile until it is fully
  * loaded, if configured to do so.
  */
-function forceImageSizeToFitScale(imageElement, scale) {
+function forceImageSizeToFitScale(tileImg, scale) {
 	if (scale != 1) {
       if (tileImg.naturalWidth && tileImg.naturalHeight && tileImg.naturalWidth>0 && tileImg.naturalHeight>0) {
-        imageElement.style.width = tileImg.naturalWidth*scale + 'px';
-        imageElement.style.height = tileImg.naturalHeight*scale + 'px';
+        tileImg.style.width = tileImg.naturalWidth*scale + 'px';
+        tileImg.style.height = tileImg.naturalHeight*scale + 'px';
       } else
       if (isIE() && tileImg.offsetWidth>0 && tileImg.offsetHeight>0) { // damn IE does not have naturalWidth ...
-        imageElement.style.width = tileImg.offsetWidth*scale + 'px';
-        imageElement.style.height = tileImg.offsetHeight*scale + 'px';
+        tileImg.style.width = tileImg.offsetWidth*scale + 'px';
+        tileImg.style.height = tileImg.offsetHeight*scale + 'px';
       }
     }
 }
