@@ -12,7 +12,7 @@ License: Apache 2.0
 
 import math
 from os.path import split, splitext
-from PIL import Image
+import Image
 
 chatty_default = False
 background_default = "FFFFFF"
