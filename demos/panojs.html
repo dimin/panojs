@@ -62,7 +62,7 @@ function createViewer( viewer, dom_id, url, prefix, w, h ) {
         imageWidth      : myPyramid.width,
         imageHeight     : myPyramid.height,
         blankTile       : 'images/blank.gif',
-        loadingTile     : 'images/progress.gif'
+        loadingTile     : 'images/progress_' + myPyramid.tilesize + '.gif'
     });
 
     Ext.EventManager.addListener( window, 'resize', callback(viewer, viewer.resize) );
