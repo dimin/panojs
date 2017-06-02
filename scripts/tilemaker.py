@@ -51,7 +51,7 @@ class Tilemaker:
             self.new_size = (self.new_size[0] * 2, self.new_size[1] * 2)
         
         img = Image.new('RGBA', self.new_size)
-        img.paste("#" + bgcolor)
+        img.paste("#" + bgcolor, box=(0, 0) + img.size)
         
         src.thumbnail(self.new_size, scaling_filter)
         img.paste(src, (int((self.new_size[0] - src.size[0]) / 2),
